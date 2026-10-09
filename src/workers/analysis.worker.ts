@@ -1,5 +1,6 @@
 import { LocalHeuristicProvider } from '../utils/analyzer';
 import { parseConversation } from '../utils/parser';
+import { startMeasurement } from '../utils/perfMonitor';
 import {
   isAnalysisRequest,
   type AnalysisRequest,
@@ -23,13 +24,15 @@ export async function runAnalysisRequest(
     return { id, ok: false, error: 'The analysis request was invalid.' };
   }
   const request: AnalysisRequest = input;
+  const stopMeasurement = startMeasurement('worker.analysis');
   try {
     const messages = parseConversation(request.rawText);
     const result = await new LocalHeuristicProvider().analyze(
       messages,
       request.userConfig
     );
-    return { id: request.id, ok: true, result };
+    const timing = stopMeasurement(messages.length);
+    return { id: request.id, ok: true, result, durationMs: timing.durationMs };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown analysis error';
     return { id: request.id, ok: false, error: message };

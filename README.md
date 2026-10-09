@@ -34,15 +34,56 @@ Privacy in MISSED. is an architectural property, not a marketing claim:
 
 ## 🧱 Architecture and security
 
-MISSED. is intentionally a static, client-only application; it does not need accounts, an API server, or a database to analyze a pasted export. Full parsing and analysis run in a dedicated Web Worker so large imports do not block the interface; the live message-count preview remains a lightweight main-thread parse. A generated service worker precaches the production app shell and hashed assets for offline use after the first successful visit.
+MISSED. is intentionally a static, client-only application; it does not need accounts, an API server, or a database to analyze a pasted export. The analysis pipeline is layered into four distinct tiers:
 
 ```text
-Chat export ──> analysis Web Worker ──> local parser + heuristic analyzer ──> cited briefing
-                    │                       │                        │
-                    └──────── source message IDs ───────────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│                          MISSED. Analysis Pipeline                         │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│  Chat export (paste / file upload)                                         │
+│       │                                                                    │
+│       ▼                                                                    │
+│  ┌──────────────────────────────────────────────────┐                     │
+│  │  Tier 1: Content-hash LRU Cache (heap-only)      │                     │
+│  │  deriveCacheKey() → djb2 hash of text + config   │                     │
+│  │  Hit: returns cached AnalysisResult instantly    │                     │
+│  │  Miss: falls through to Worker tier              │                     │
+│  └────────────────────┬─────────────────────────────┘                     │
+│                       │ cache miss                                         │
+│                       ▼                                                    │
+│  ┌──────────────────────────────────────────────────┐                     │
+│  │  Tier 2: Analysis Web Worker (off main thread)   │                     │
+│  │  • Runtime-validated typed request/response      │                     │
+│  │  • parseConversation() → structured Message[]    │                     │
+│  │  • LocalHeuristicProvider.analyze() → items      │                     │
+│  │  • startMeasurement() → durationMs in response  │                     │
+│  │  • Superseded workers are immediately terminated │                     │
+│  └────────────────────┬─────────────────────────────┘                     │
+│                       │ typed AnalysisResponse                             │
+│                       ▼                                                    │
+│  ┌──────────────────────────────────────────────────┐                     │
+│  │  Tier 3: Performance Monitor (ring buffer)       │                     │
+│  │  • High-precision Performance API timing         │                     │
+│  │  • TimingRingBuffer retains last 20 samples      │                     │
+│  │  • Cache hits also recorded (0 ms duration)      │                     │
+│  │  • Zero external transmission                    │                     │
+│  └────────────────────┬─────────────────────────────┘                     │
+│                       │ AnalysisResult                                     │
+│                       ▼                                                    │
+│  ┌──────────────────────────────────────────────────┐                     │
+│  │  Tier 4: React UI (main thread)                  │                     │
+│  │  • Interactive briefing + source inspector       │                     │
+│  │  • Source IDs link every finding to its message  │                     │
+│  │  • All chat state lives in React memory only     │                     │
+│  └──────────────────────────────────────────────────┘                     │
+│                                                                            │
+│  Offline: Service Worker precaches hashed JS/CSS/worker assets             │
+│  Security: Vercel CSP + Permissions-Policy + no-cache for chat data        │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The worker validates request/response shapes at runtime, superseded work is terminated, stale messages are ignored, and failures are surfaced in the interface. The only persistent application preference is whether the optional tour was seen; the service worker precaches generated app assets and does not dynamically cache arbitrary requests. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy. The policy permits the Google Fonts stylesheet and font files used by the UI; it does not permit chat-content requests to third-party origins.
+The worker validates request/response shapes at runtime (including `durationMs` on success), superseded work is terminated, stale messages are ignored, and failures are surfaced in the interface. The LRU cache (`AnalysisLRUCache`) deduplicates repeated analyses of the same conversation within a session — entries expire after 10 minutes and the cache is bounded to 10 entries to prevent unbounded memory growth. The only persistent application preference is whether the optional tour was seen; the service worker precaches generated app assets and does not dynamically cache arbitrary requests. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy.
 
 ---
 
@@ -52,7 +93,7 @@ The worker validates request/response shapes at runtime, superseded work is term
 - **Bundler & Build Tool**: Vite 8
 - **Styling**: Tailwind CSS v4
 - **Icons**: Lucide React
-- **Test Runner**: Vitest (30 passing unit tests)
+- **Test Runner**: Vitest (63 passing unit tests across 7 test files)
 - **Deployment**: Static Site Hosting (Vercel Ready)
 
 ---
@@ -84,7 +125,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ```bash
 npm test
 ```
-Runs 30 automated Vitest unit tests verifying:
+Runs **63 automated Vitest unit tests across 7 test files** verifying:
 - Bracketed and unbracketed message parsing
 - Multiline continuation and malformed line preservation
 - Urgency and priority scoring
@@ -94,6 +135,8 @@ Runs 30 automated Vitest unit tests verifying:
 - Chronological story selection and source-message integrity
 - Markdown and Plain Text export formatting
 - Worker request/response validation, lifecycle, failures, cancellation, and stale-message handling
+- **LRU cache**: key derivation, TTL expiry, LRU eviction, MRU promotion, diagnostics, singleton round-trip
+- **Performance monitor**: startMeasurement accuracy, TimingRingBuffer capacity, eviction, average, clear, copy safety
 
 ### 4. Build for Production
 ```bash
@@ -161,40 +204,53 @@ vercel
 ```
 ProtocolX/
 ├── src/
-│   ├── __tests__/             # Automated unit tests
-│   │   ├── analyzer.test.ts   # Urgency, decisions, mentions, timeline tests
-│   │   ├── catchUpStory.test.ts # Chronological story and source integrity tests
-│   │   ├── exporter.test.ts   # Markdown & TXT formatting tests
-│   │   └── parser.test.ts     # Multi-format message parser tests
-│   ├── components/            # Modular React components
-│   │   ├── AiConsentModal.tsx # Optional remote AI architecture modal
-│   │   ├── CatchUpStory.tsx   # Short chronological story with evidence links
-│   │   ├── Dashboard.tsx      # Catch-up inbox (Sections A through H)
-│   │   ├── GuidedDemo.tsx     # First-visit and replayable guided walkthrough
-│   │   ├── InputSection.tsx   # Paste, file upload, & alias configuration
-│   │   ├── ItemCard.tsx       # Cards with priority, "why it matters", & source ref
-│   │   ├── LandingHero.tsx    # Hero, benefits, preview, & method indicators
-│   │   ├── Navbar.tsx         # Brand, live privacy badge, & actions
-│   │   ├── PrivacyModal.tsx   # Technical privacy guarantee breakdown
-│   │   └── SourceViewer.tsx   # Raw message inspector with target jump & search
+│   ├── __tests__/                  # 63 automated unit tests across 7 files
+│   │   ├── analysisCache.test.ts   # LRU cache: TTL, eviction, MRU, diagnostics (18 tests)
+│   │   ├── analysisWorker.test.ts  # Worker lifecycle, cancellation, stale msgs (6 tests)
+│   │   ├── analyzer.test.ts        # Urgency, decisions, mentions, timeline (11 tests)
+│   │   ├── catchUpStory.test.ts    # Chronological story and source integrity (2 tests)
+│   │   ├── exporter.test.ts        # Markdown & TXT formatting tests (2 tests)
+│   │   ├── parser.test.ts          # Multi-format message parser tests (9 tests)
+│   │   └── perfMonitor.test.ts     # TimingRingBuffer, startMeasurement (15 tests)
+│   ├── components/                 # Modular React components
+│   │   ├── AiConsentModal.tsx      # Optional remote AI architecture modal
+│   │   ├── CatchUpStory.tsx        # Short chronological story with evidence links
+│   │   ├── Dashboard.tsx           # Catch-up inbox (Sections A through H)
+│   │   ├── GuidedDemo.tsx          # First-visit and replayable guided walkthrough
+│   │   ├── InputSection.tsx        # Paste, file upload, & alias configuration
+│   │   ├── ItemCard.tsx            # Cards with priority, "why it matters", & source ref
+│   │   ├── LandingHero.tsx         # Hero, benefits, preview, & method indicators
+│   │   ├── Navbar.tsx              # Brand, live privacy badge, & actions
+│   │   ├── PrivacyModal.tsx        # Technical privacy guarantee breakdown
+│   │   └── SourceViewer.tsx        # Raw message inspector with target jump & search
 │   ├── data/
-│   │   └── sampleConversation.ts # 40+ message realistic Hackathon dataset
+│   │   └── sampleConversation.ts   # 40+ message realistic Hackathon dataset
+│   ├── hooks/
+│   │   ├── useDialogAccessibility.ts  # Keyboard focus trap for dialogs
+│   │   └── useLocalAnalysisWorker.ts  # Cached + cancellable worker hook
 │   ├── types/
-│   │   ├── guidedDemo.ts      # Tour states and local preference key
-│   │   └── index.ts           # Core TypeScript data contracts
+│   │   ├── guidedDemo.ts           # Tour states and local preference key
+│   │   └── index.ts                # Core TypeScript data contracts
 │   ├── utils/
-│   │   ├── analyzer.ts        # Local-first explainable heuristic engine
-│   │   ├── dateParser.ts      # Deadline extractor & ambiguity reasoner
-│   │   ├── exporter.ts        # Markdown & TXT report generators
-│   │   └── parser.ts          # Robust multi-format chat log parser
-│   ├── App.tsx                # Top-level state coordinator
-│   ├── index.css              # Tailwind CSS v4 & custom scrollbar styling
-│   └── main.tsx               # React DOM entrypoint
-├── index.html                 # Clean semantic HTML5 with SEO meta & fonts
-├── package.json               # Dependencies and test scripts
-├── tsconfig.json              # Strict TypeScript configuration
-├── vercel.json                # Vercel SPA routing and build configuration
-└── vite.config.ts             # Vite 8 + Tailwind CSS v4 plugin setup
+│   │   ├── analysisCache.ts        # LRU cache: djb2 hash, TTL, bounded eviction
+│   │   ├── analyzer.ts             # Local-first explainable heuristic engine
+│   │   ├── catchUpStory.ts         # Chronological narrative generator
+│   │   ├── dateParser.ts           # Deadline extractor & ambiguity reasoner
+│   │   ├── exporter.ts             # Markdown & TXT report generators
+│   │   ├── parser.ts               # Robust multi-format chat log parser
+│   │   └── perfMonitor.ts          # High-precision perf timing + ring buffer
+│   ├── workers/
+│   │   ├── analysis.worker.ts      # Worker entrypoint with startMeasurement
+│   │   ├── analysisClient.ts       # Typed worker lifecycle + perf buffer integration
+│   │   └── analysisProtocol.ts     # Runtime-validated request/response contracts
+│   ├── App.tsx                     # Top-level state coordinator
+│   ├── index.css                   # Tailwind CSS v4 & custom scrollbar styling
+│   └── main.tsx                    # React DOM entrypoint
+├── index.html                      # Clean semantic HTML5 with SEO meta & fonts
+├── package.json                    # Dependencies and test scripts
+├── tsconfig.json                   # Strict TypeScript configuration
+├── vercel.json                     # Vercel SPA routing, CSP, Permissions-Policy
+└── vite.config.ts                  # Vite 8 + Tailwind CSS v4 + service worker plugin
 ```
 
 ---

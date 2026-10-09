@@ -7,7 +7,7 @@ export interface AnalysisRequest {
 }
 
 export type AnalysisResponse =
-  | { id: number; ok: true; result: AnalysisResult }
+  | { id: number; ok: true; result: AnalysisResult; durationMs: number }
   | { id: number; ok: false; error: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -42,7 +42,11 @@ export function isAnalysisResponse(value: unknown): value is AnalysisResponse {
     response.id < 1
   ) return false;
   if (response.ok === false) return typeof response.error === 'string';
-  if (response.ok !== true || !isRecord(response.result)) {
+  if (
+    response.ok !== true ||
+    !isRecord(response.result) ||
+    typeof response.durationMs !== 'number'
+  ) {
     return false;
   }
 

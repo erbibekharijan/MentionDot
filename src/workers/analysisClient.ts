@@ -1,4 +1,5 @@
 import type { AnalysisResult } from '../types';
+import { analysisTimingBuffer } from '../utils/perfMonitor';
 import {
   isAnalysisResponse,
   type AnalysisRequest,
@@ -59,8 +60,22 @@ export class LocalAnalysisWorkerClient {
           return;
         }
         const response: AnalysisResponse = event.data;
-        if (response.ok) this.finish(worker, undefined, response.result);
-        else this.finish(worker, new Error(response.error));
+        if (response.ok) {
+          // Record worker-reported timing into the shared ring buffer.
+          analysisTimingBuffer.push({
+            label: 'worker.analysis',
+            durationMs: response.durationMs,
+            messageCount: response.result.messages.length,
+            completedAt: response.result.analyzedAt,
+            msPerMessage:
+              response.result.messages.length > 0
+                ? response.durationMs / response.result.messages.length
+                : 0,
+          });
+          this.finish(worker, undefined, response.result);
+        } else {
+          this.finish(worker, new Error(response.error));
+        }
       };
       worker.onerror = () => {
         this.finish(worker, new Error('The local analysis worker stopped unexpectedly.'));

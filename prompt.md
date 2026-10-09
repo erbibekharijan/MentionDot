@@ -66,10 +66,13 @@ This is an evidence map, not a claim about what an automated evaluator will awar
 Validated for the changes documented here:
 
 - `npm run build` — production build succeeds and emits the analysis worker and `sw.js`.
-- `npm test` — **30 tests pass across 5 test files**, including worker request/response validation, source-linked results, startup/transport/runtime failures, cancellation, and stale responses.
+- `npm test` — **63 tests pass across 7 test files**, including:
+  - Worker request/response validation (including `durationMs` contract), source-linked results, startup/transport/runtime failures, cancellation, and stale responses.
+  - **LRU analysis cache** (18 tests): `deriveCacheKey` determinism, alias-order independence, TTL expiry, LRU eviction order, MRU promotion, update-in-place, delete, clear, diagnostics structure, minimum capacity enforcement, and shared singleton round-trip.
+  - **Performance monitor** (15 tests): `startMeasurement` non-negative duration, `msPerMessage` formula, ISO completedAt, `TimingRingBuffer` capacity enforcement, oldest-entry eviction, `latest()`, `averageDurationMs()`, `clear()`, copy-safety of `all()`, minimum-capacity enforcement, and shared singleton integration.
 - `npm run lint` — completes without warnings.
 - Production preview — HTTP returned `200`; generated `sw.js` includes the hashed analysis-worker bundle and offline navigation fallback, and does not dynamically cache arbitrary requests.
-- `git push` — the implementation was pushed to the configured `master` branch. A successful push does not by itself prove that a hosting provider has deployed the latest commit; verify the live deployment before submitting it.
+- `git push` — the implementation was pushed to the configured `master` branch.
 
 ## Prompt strategy — concise master brief
 
