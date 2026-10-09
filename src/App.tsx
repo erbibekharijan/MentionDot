@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { LandingHero } from './components/LandingHero';
 import { InputSection } from './components/InputSection';
@@ -8,11 +8,14 @@ import { AiConsentModal } from './components/AiConsentModal';
 import { GuidedDemo } from './components/GuidedDemo';
 import { SAMPLE_CONVERSATION_RAW } from './data/sampleConversation';
 import { parseConversation } from './utils/parser';
+import { sanitizeRawText } from './utils/sanitizer';
+import { validateAnalysisInputs } from './utils/inputValidator';
 import type { AnalysisResult, UserConfig } from './types';
 import { GUIDED_DEMO_SEEN_KEY } from './types/guidedDemo';
 import type { GuidedDemoStep } from './types/guidedDemo';
 import { ShieldCheck } from 'lucide-react';
 import { useLocalAnalysisWorker } from './hooks/useLocalAnalysisWorker';
+import { useDebouncedValue } from './hooks/useDebouncedValue';
 
 export function App() {
   const { analyze: analyzeInWorker, cancel: cancelWorkerAnalysis } =
@@ -43,12 +46,12 @@ export function App() {
   const tourGeneration = useRef(0);
   const analysisGeneration = useRef(0);
 
-  // Live parsed message count
-  const messageCount = useMemo(() => {
-    if (!rawText.trim()) return 0;
-    const msgs = parseConversation(rawText);
-    return msgs.length;
-  }, [rawText]);
+  // Live parsed message count — debounced to avoid per-keystroke parser runs
+  // on large conversation pastes (e.g. 500+ lines).
+  const debouncedRawText = useDebouncedValue(rawText, 300);
+  const messageCount = debouncedRawText.trim()
+    ? parseConversation(debouncedRawText).length
+    : 0;
 
   // Run analysis
   const executeAnalysis = async (
@@ -86,7 +89,17 @@ export function App() {
 
   const handleAnalyze = () => {
     if (!rawText.trim()) return;
-    executeAnalysis(rawText, userConfig);
+    // Sanitize input before dispatching to the worker.
+    const sanitized = sanitizeRawText(rawText);
+    // Validate sanitized text + config before starting the worker.
+    const validation = validateAnalysisInputs(sanitized, userConfig);
+    if (!validation.ok) {
+      setAnalysisError(validation.reason);
+      return;
+    }
+    // Replace displayed raw text with the sanitized version.
+    setRawText(sanitized);
+    executeAnalysis(sanitized, userConfig);
   };
 
   // Instant Demo: Load sample and analyze in one click

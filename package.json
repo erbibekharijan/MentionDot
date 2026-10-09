@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "server": "node --experimental-strip-types server/index.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
