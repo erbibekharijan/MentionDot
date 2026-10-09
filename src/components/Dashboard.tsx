@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type {
   AnalysisResult,
   PriorityLevel,
@@ -8,6 +8,7 @@ import { CatchUpStory } from './CatchUpStory';
 import { SourceViewer } from './SourceViewer';
 import { formatAsMarkdown, formatAsPlainText, downloadFile } from '../utils/exporter';
 import { SentinelBot } from './SentinelBot';
+import type { GuidedDemoStep } from '../types/guidedDemo';
 import {
   Sparkles,
   AlertTriangle,
@@ -33,6 +34,8 @@ interface DashboardProps {
   onUpdateResult: (updated: AnalysisResult) => void;
   onReset: () => void;
   onOpenPrivacy: () => void;
+  tourStep: GuidedDemoStep | null;
+  onTourSourceOpened: () => void;
 }
 
 type FilterTab = 'all' | 'urgent' | 'task' | 'deadline' | 'decision' | 'mention' | 'question' | 'update' | 'completed';
@@ -43,6 +46,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onUpdateResult,
   onReset,
   onOpenPrivacy,
+  tourStep,
+  onTourSourceOpened,
 }) => {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,6 +55,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [sourceViewerOpen, setSourceViewerOpen] = useState(false);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tourStep !== 'evidence') setSourceViewerOpen(false);
+  }, [tourStep]);
 
   // Toggle item completion
   const handleToggleComplete = (itemId: string) => {
@@ -75,6 +84,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const handleViewSource = (messageId: string) => {
     setHighlightedMessageId(messageId);
     setSourceViewerOpen(true);
+    if (tourStep === 'source') onTourSourceOpened();
   };
 
   // Copy Executive Summary
@@ -166,7 +176,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Global actions: Copy, Export, View All Raw */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div data-tour="briefing-tools" className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handleCopySummary}
@@ -336,7 +346,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </section>
 
       {/* Section Filter & Search Toolbar */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 p-4 rounded-xl bg-[#121317] border border-[#23242a]">
+      <div data-tour="filters" className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 p-4 rounded-xl bg-[#121317] border border-[#23242a]">
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
           {[

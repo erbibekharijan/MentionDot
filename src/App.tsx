@@ -5,10 +5,14 @@ import { InputSection } from './components/InputSection';
 import { Dashboard } from './components/Dashboard';
 import { PrivacyModal } from './components/PrivacyModal';
 import { AiConsentModal } from './components/AiConsentModal';
+import { GuidedDemo } from './components/GuidedDemo';
 import { SAMPLE_CONVERSATION_RAW } from './data/sampleConversation';
+import { buildCatchUpStory } from './utils/catchUpStory';
 import { parseConversation } from './utils/parser';
 import { LocalHeuristicProvider } from './utils/analyzer';
 import type { AnalysisResult, UserConfig } from './types';
+import { GUIDED_DEMO_SEEN_KEY } from './types/guidedDemo';
+import type { GuidedDemoStep } from './types/guidedDemo';
 import { ShieldCheck } from 'lucide-react';
 
 const localAnalyzer = new LocalHeuristicProvider();
@@ -23,6 +27,17 @@ export function App() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [privacyModalOpen, setPrivacyModalOpen] = useState<boolean>(false);
   const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
+  const [tourStep, setTourStep] = useState<GuidedDemoStep | null>(() => {
+    try {
+      return window.localStorage.getItem(GUIDED_DEMO_SEEN_KEY) === 'true'
+        ? null
+        : 'welcome';
+    } catch (error) {
+      console.error('Could not read the guided-demo preference:', error);
+      return 'welcome';
+    }
+  });
+  const [tourNotice, setTourNotice] = useState<string | null>(null);
 
   // Live parsed message count
   const messageCount = useMemo(() => {
@@ -32,7 +47,7 @@ export function App() {
   }, [rawText]);
 
   // Run analysis
-  const executeAnalysis = async (textToAnalyze: string, config: UserConfig) => {
+  const executeAnalysis = async (textToAnalyze: string, config: UserConfig): Promise<boolean> => {
     setIsAnalyzing(true);
     try {
       const messages = parseConversation(textToAnalyze);
@@ -41,8 +56,10 @@ export function App() {
 
       // Scroll to dashboard
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return true;
     } catch (err) {
       console.error('Analysis failed:', err);
+      return false;
     } finally {
       setIsAnalyzing(false);
     }
@@ -62,6 +79,57 @@ export function App() {
     executeAnalysis(SAMPLE_CONVERSATION_RAW, userConfig);
   };
 
+  const rememberTourChoice = () => {
+    try {
+      window.localStorage.setItem(GUIDED_DEMO_SEEN_KEY, 'true');
+      setTourNotice(null);
+    } catch (error) {
+      console.error('Could not save the guided-demo preference:', error);
+      setTourNotice(
+        'Your browser blocked saving this tutorial preference. The tour can still run, but may appear again on your next visit.'
+      );
+    }
+  };
+
+  const handleStartTour = () => {
+    rememberTourChoice();
+    setTourStep('input');
+  };
+
+  const handleCloseTour = () => {
+    rememberTourChoice();
+    setTourStep(null);
+  };
+
+  const handleReplayTour = () => {
+    setTourNotice(null);
+    setTourStep(result && buildCatchUpStory(result).length > 0 ? 'story' : 'input');
+  };
+
+  const handleTourLoadDemo = async () => {
+    setTourNotice(null);
+    setRawText(SAMPLE_CONVERSATION_RAW);
+    const loaded = await executeAnalysis(SAMPLE_CONVERSATION_RAW, userConfig);
+    if (loaded) {
+      setTourStep('story');
+    } else {
+      setTourNotice('The sample could not be analyzed. Retry, or skip the tour.');
+    }
+  };
+
+  const handleTourAdvance = () => {
+    if (tourStep === 'story') setTourStep('source');
+    else if (tourStep === 'evidence') setTourStep('task');
+    else if (tourStep === 'task') setTourStep('filters');
+    else if (tourStep === 'filters') setTourStep('tools');
+    else if (tourStep === 'tools') setTourStep('finish');
+    else if (tourStep === 'finish') handleCloseTour();
+  };
+
+  const handleTourSourceOpened = () => {
+    if (tourStep === 'source') setTourStep('evidence');
+  };
+
   // Load sample into textarea for inspection
   const handleLoadSample = () => {
     setRawText(SAMPLE_CONVERSATION_RAW);
@@ -69,9 +137,10 @@ export function App() {
 
   // Reset all state to pure in-memory zero
   const handleReset = () => {
-    if (window.confirm('Clear all conversation and briefing data from memory?')) {
+    if (window.confirm('Clear the current conversation and briefing? Your tutorial preference will be kept.')) {
       setRawText('');
       setResult(null);
+      setTourStep(null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -91,6 +160,7 @@ export function App() {
         onOpenAiModal={() => setAiModalOpen(true)}
         onReset={handleReset}
         hasData={Boolean(result || rawText)}
+        onReplayTour={handleReplayTour}
       />
 
       {/* Main Content */}
@@ -102,6 +172,8 @@ export function App() {
             onUpdateResult={setResult}
             onReset={handleReset}
             onOpenPrivacy={() => setPrivacyModalOpen(true)}
+            tourStep={tourStep}
+            onTourSourceOpened={handleTourSourceOpened}
           />
         ) : (
           /* Landing Page & Input */
@@ -161,6 +233,31 @@ export function App() {
         onClose={() => setAiModalOpen(false)}
         activeProvider={localAnalyzer.name}
       />
+
+      <GuidedDemo
+        step={tourStep}
+        notice={tourNotice}
+        onStart={handleStartTour}
+        onSkip={handleCloseTour}
+        onLoadDemo={handleTourLoadDemo}
+        onAdvance={handleTourAdvance}
+      />
+
+      {tourNotice && !tourStep && (
+        <div
+          role="status"
+          className="fixed bottom-4 left-4 z-[90] flex max-w-md items-start gap-3 rounded-xl border border-amber-300 bg-[#fffefa] p-4 text-sm text-amber-950 shadow-xl"
+        >
+          <span>{tourNotice}</span>
+          <button
+            type="button"
+            onClick={() => setTourNotice(null)}
+            className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold hover:bg-amber-50"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -64,7 +64,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
             <div>
               <div className="font-semibold text-[#f4f3ee]">Ephemeral In-Memory React State</div>
               <p className="text-zinc-400 mt-0.5">
-                Pasted text and uploaded files remain exclusively in transient memory. We do not persist sensitive chats into `localStorage` or `IndexedDB`. Hitting “Clear Data” or closing the tab completely erases all data.
+                Pasted text, uploaded files, analysis, and checklist changes stay in transient memory; chat content is never written to `localStorage` or `IndexedDB`. A single `localStorage` flag remembers that you started or skipped the optional guided demo. “Clear Data” and closing the tab erase the current chat and briefing, but keep that preference so the welcome does not return.
               </p>
             </div>
           </div>

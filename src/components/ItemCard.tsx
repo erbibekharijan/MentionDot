@@ -64,6 +64,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         <div className="flex items-center gap-2 pt-0.5">
           <button
             type="button"
+            data-tour="completion-toggle"
             onClick={() => onToggleComplete?.(item.id)}
             disabled={!onToggleComplete}
             aria-pressed={Boolean(item.isCompleted)}

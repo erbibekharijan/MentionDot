@@ -10,7 +10,7 @@ interface SentinelBotProps {
 const TIPS = [
   'I extract confirmed commitments — not casual chitchat. Every item links to its exact source message.',
   'Try clicking any [msg-X] reference to see the exact raw message that triggered this item.',
-  'Zero data leaves your machine. Every byte lives in volatile browser memory — tab close = full purge.',
+  'Chat content stays in memory. A tiny local preference only remembers whether you dismissed the guided tour.',
   'Mark action items ✓ as you work through your queue. Progress is tracked in the briefing header.',
   'Deadlines marked "uncertain" mean I found a relative date but couldn\'t resolve the exact calendar date — always verify.',
 ];

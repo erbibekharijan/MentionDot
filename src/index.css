@@ -196,6 +196,16 @@
   box-shadow: 0 16px 34px rgba(41, 43, 49, 0.09);
 }
 
+.guided-tour-target {
+  position: relative;
+  z-index: 70 !important;
+  outline: 3px solid rgba(185, 120, 27, 0.82) !important;
+  outline-offset: 5px;
+  box-shadow: 0 0 0 9px rgba(255, 254, 250, 0.9), 0 10px 34px rgba(32, 42, 53, 0.18) !important;
+  border-radius: 1rem;
+  scroll-margin-block: 7rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

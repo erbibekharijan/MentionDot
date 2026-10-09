@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, RotateCcw, Cpu } from 'lucide-react';
+import { ShieldCheck, RotateCcw, Cpu, BookOpenCheck } from 'lucide-react';
 
 interface NavbarProps {
   onOpenPrivacy: () => void;
   onOpenAiModal: () => void;
   onReset: () => void;
+  onReplayTour: () => void;
   hasData: boolean;
 }
 
@@ -12,6 +13,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPrivacy,
   onOpenAiModal,
   onReset,
+  onReplayTour,
   hasData,
 }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -97,6 +99,23 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* ── Actions ── */}
         <div className="flex items-center gap-2">
 
+          <button
+            type="button"
+            onClick={onReplayTour}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all focus-ring"
+            style={{
+              background: '#111114',
+              border: '1px solid #1e1e24',
+              fontSize: 11,
+              color: '#a8a49c',
+              fontFamily: 'var(--font-mono)',
+            }}
+            title="Replay the guided product tour"
+          >
+            <BookOpenCheck className="w-3.5 h-3.5" style={{ color: '#f5a623' }} />
+            <span>TOUR</span>
+          </button>
+
           {/* Privacy badge */}
           <button
             type="button"
@@ -150,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 color: '#a8a49c',
                 fontFamily: 'var(--font-mono)',
               }}
-              title="Clear all data from memory"
+              title="Clear the current conversation and briefing. Your tutorial preference is kept."
             >
               <RotateCcw className="w-3 h-3" />
               <span className="hidden sm:inline">CLEAR</span>

@@ -16,6 +16,8 @@ This is an honest, partial prompt record—not a claim to reproduce the full ori
 
 > Show a short story. Make the result trustworthy. Implement this.
 
+> Add a demo mode, also skip option to skip demo if dont want demo, demo will take you through everything. how to use, where to go and all. Demo shall not pop again after refreshing website, or after reset. Is it good thing to add?
+
 ## Optional prompts for future work
 
 The following are suggested prompts, written now as possible next steps. They are **not** part of the historical prompt record and should not be represented as prompts already used.

@@ -20,6 +20,7 @@ export const CatchUpStory: React.FC<CatchUpStoryProps> = ({ result, onViewSource
   return (
     <section
       aria-labelledby="catch-up-story-title"
+      data-tour="catch-up-story"
       className="overflow-hidden rounded-2xl border border-[#e3ddd2] bg-white shadow-sm"
     >
       <div className="flex flex-col gap-4 border-b border-[#e3ddd2] bg-[#fbfaf7] px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
@@ -87,6 +88,7 @@ export const CatchUpStory: React.FC<CatchUpStoryProps> = ({ result, onViewSource
                     <button
                       type="button"
                       onClick={() => onViewSource(message.id)}
+                      data-tour={index === 0 ? 'story-source' : undefined}
                       className="ml-auto inline-flex items-center gap-1 rounded-lg border border-[#e3ddd2] bg-white px-2.5 py-1 text-xs font-semibold text-[#80500e] transition hover:border-amber-300 hover:bg-amber-50"
                       aria-label={`Open original source message ${message.id}`}
                     >

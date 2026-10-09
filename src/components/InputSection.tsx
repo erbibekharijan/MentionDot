@@ -104,7 +104,7 @@ export const InputSection: React.FC<InputSectionProps> = ({
   };
 
   return (
-    <div id="input-section" className="max-w-4xl mx-auto px-4 pb-20">
+    <div id="input-section" data-tour="input-section" className="max-w-4xl mx-auto px-4 pb-20">
       {/* Sentinel Bot bubble */}
       <div
         className="mb-5 p-4 rounded-2xl"

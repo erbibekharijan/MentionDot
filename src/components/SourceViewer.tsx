@@ -47,7 +47,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] md:w-[560px] bg-[#0c0d10] border-l border-[#24262d] shadow-2xl flex flex-col transition-transform duration-300 animate-in slide-in-from-right duration-200">
+    <div data-tour="source-evidence" className="fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] md:w-[560px] bg-[#0c0d10] border-l border-[#24262d] shadow-2xl flex flex-col transition-transform duration-300 animate-in slide-in-from-right duration-200">
       {/* Header */}
       <div className="p-4.5 border-b border-[#23242a] flex items-center justify-between bg-[#121317]">
         <div>

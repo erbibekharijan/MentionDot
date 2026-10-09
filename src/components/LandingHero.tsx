@@ -453,7 +453,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
               accent: '#34d399',
               tag: 'PRIVACY',
               title: 'Keep your conversations private.',
-              body: 'Runs 100% locally in your browser. No backend databases, no chat telemetry. Data lives in volatile memory — tab close = full purge.',
+              body: 'Runs 100% locally in your browser. No backend databases or chat telemetry. Conversation data stays in memory; only the optional tour preference is saved locally.',
             },
           ].map(({ icon, accent, tag, title, body }) => (
             <div
