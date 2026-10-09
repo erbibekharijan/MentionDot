@@ -1,26 +1,77 @@
-# MISSED. — Vibe-coding prompt notes
+# MISSED. — Vibe-coding prompt record
 
-## What this file records
+## Scope and accuracy
 
-This is an honest, partial prompt record—not a claim to reproduce the full original build history. The original prompts used to create the project were not included in this conversation. The reconstructed brief below is based on the project that exists in the repository; it is not presented as a verbatim prompt that was actually sent.
+This file records the project-related prompts visible in the conversation used for this repository work. User prompts below are transcribed from that conversation; small formatting changes only add quotation blocks and headings.
 
-## Reconstructed project brief
+This is not the complete historical prompt log for the original project. The prompts used before this conversation, including any prompts in another editor or vibe-coding tool, were not provided here and cannot be recovered from the source code. The project brief below is a reconstruction based on the current app, not a claim about what was originally typed.
 
-> Build **MISSED.**, a polished, privacy-first web app that helps someone catch up on a busy team chat. Let the user paste a conversation or upload a plain-text export, configure their name and aliases, then analyze messages locally in the browser. Surface a concise executive summary, urgent actions, deadlines, decisions, direct mentions, unanswered questions, important updates, and a chronological timeline. Make each result traceable to its source message, allow action items to be checked off, and support exporting the briefing. Use a distinctive editorial interface with a friendly animated bot, clear hierarchy, responsive layouts, and accessible interactions. Be transparent about uncertain dates and keep chat data in volatile browser memory rather than sending it to a service.
+## Reconstructed project brief — not a verbatim historical prompt
 
-## Exact project-improvement prompts available in this conversation
+> Build **MISSED.**, a privacy-first app that helps people catch up on busy team chats. Let users paste a conversation or upload a plain-text export, configure their name and aliases, and analyze messages locally in the browser. Surface an executive summary, urgent actions, deadlines, decisions, direct mentions, unanswered questions, important updates, and a chronological timeline. Link findings to their source messages, allow checklist items to be marked complete, and support exporting the briefing. Use a distinctive, readable interface with a friendly animated bot, responsive layouts, and accessible interactions. Clearly flag ambiguous dates and avoid sending chat content to a service.
 
-> Task 1: text is looking bad and unclear due to the black dark UI. Improve it and don't make it look like made by AI, like I need a creative, professional UI with animations and bots.
+## User prompts visible in this conversation
+
+### 1. Initial UI and accuracy request
+
+> Task 1: text is looking bad and unclear due to the black dark ui,
+> Improve it and dont make it look like made by AI, Like i need a creative UI professional with animations and bots etc.
 >
-> Task 2: "Today" is being detected from the chat text even when the message is from yesterday. Use the message timeline/date, not just the word in the message. Some chats also don't show a checkbox. Make this accurate.
+> Task 2:there is an issue that, it says "Today" just based on it sees the text 'Today' in the chat even though if it's yesterday's message ignoring the timeline of when the data is sent, fix that. I am not even getting tick box for some chats. I want it to be fucking accurate.
 
-> Show a short story. Make the result trustworthy. Implement this.
+### 2. GitHub publishing and prompt-file request
 
-> Add a demo mode, also skip option to skip demo if dont want demo, demo will take you through everything. how to use, where to go and all. Demo shall not pop again after refreshing website, or after reset. Is it good thing to add?
+> https://github.com/erbibekharijan/MentionDot.git
+>
+> this is my githuub, more i push, more I am getting point. Based on commit I am getting points.
+>
+> Add prompt.md too including what what prompt i gave to vibe code this project. You can add imaginary adding prompt by yourself.
+>
+> Just dont forget to push it a lot every section and all I have to win man
+>
+> Since its a vibe codding hackathon project.
 
-## Optional prompts for future work
+### 3. Product differentiation
 
-The following are suggested prompts, written now as possible next steps. They are **not** part of the historical prompt record and should not be represented as prompts already used.
+> It still does't feel like hackathon winning, since everyone is vibecodding, i need to do different than them what else shall I add
+
+### 4. Reaction to the Change Radar suggestion
+
+> why shall I add change radar, both of us will have same text right, he downloaded the chat that i did, file wont change for me
+
+### 5. Catch-up story and trust cues
+
+> Show a short story
+> Make the result trustworthy
+> implement this
+
+### 6. Run the app
+
+> run it
+
+### 7. Ask where the trust cues appear
+
+> where is trust cues added, what is it mentioned as, can u show an example
+
+### 8. Hosting and pushing status
+
+> is the website ready to be hosted and are you pushing it as i said
+
+### 9. Commit-count concern
+
+> i many commit is there, my winning factor depends on commit too
+
+### 10. Guided demo request
+
+> add a demo mode, also skip option to skip demo if dont want demo, demo will take you through everything. how to use, where to go and all. Demo shall not pop again after refreshing website, or after reset. Is it good thing to add?
+
+### 11. Request to complete this file
+
+> did u update prompt.md, it shoud have everything
+
+## Suggested prompts for possible future work — not prompts already used
+
+These are optional prompts drafted as ideas. They are not part of the historical user-prompt log.
 
 ### Improve date accuracy
 
