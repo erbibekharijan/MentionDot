@@ -13,7 +13,7 @@ import { validateAnalysisInputs } from './utils/inputValidator';
 import type { AnalysisResult, UserConfig } from './types';
 import { GUIDED_DEMO_SEEN_KEY } from './types/guidedDemo';
 import type { GuidedDemoStep } from './types/guidedDemo';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, AlertCircle } from 'lucide-react';
 import { useLocalAnalysisWorker } from './hooks/useLocalAnalysisWorker';
 import { useDebouncedValue } from './hooks/useDebouncedValue';
 
@@ -94,9 +94,11 @@ export function App() {
     // Validate sanitized text + config before starting the worker.
     const validation = validateAnalysisInputs(sanitized, userConfig);
     if (!validation.ok) {
-      setAnalysisError(validation.reason);
+      setAnalysisError(validation.reason || 'Input validation failed. Please check your conversation text.');
       return;
     }
+    // Clear any previous error on valid input
+    setAnalysisError(null);
     // Replace displayed raw text with the sanitized version.
     setRawText(sanitized);
     executeAnalysis(sanitized, userConfig);
@@ -251,6 +253,25 @@ export function App() {
               onScrollToInput={handleScrollToInput}
               onOpenPrivacy={() => setPrivacyModalOpen(true)}
             />
+
+            {analysisError && (
+              <div
+                role="alert"
+                className="max-w-4xl mx-auto my-4 p-4 rounded-xl border border-rose-500/30 bg-rose-950/40 text-rose-200 flex items-center justify-between gap-3 text-sm animate-fade-in"
+              >
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                  <span>{analysisError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAnalysisError(null)}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-900/60 hover:bg-rose-900 text-rose-200 transition-colors cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
 
             <InputSection
               rawText={rawText}
