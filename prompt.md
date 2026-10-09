@@ -8,11 +8,13 @@ This is an honest, partial prompt record—not a claim to reproduce the full ori
 
 > Build **MISSED.**, a polished, privacy-first web app that helps someone catch up on a busy team chat. Let the user paste a conversation or upload a plain-text export, configure their name and aliases, then analyze messages locally in the browser. Surface a concise executive summary, urgent actions, deadlines, decisions, direct mentions, unanswered questions, important updates, and a chronological timeline. Make each result traceable to its source message, allow action items to be checked off, and support exporting the briefing. Use a distinctive editorial interface with a friendly animated bot, clear hierarchy, responsive layouts, and accessible interactions. Be transparent about uncertain dates and keep chat data in volatile browser memory rather than sending it to a service.
 
-## Exact project-improvement prompt available in this conversation
+## Exact project-improvement prompts available in this conversation
 
 > Task 1: text is looking bad and unclear due to the black dark UI. Improve it and don't make it look like made by AI, like I need a creative, professional UI with animations and bots.
 >
 > Task 2: "Today" is being detected from the chat text even when the message is from yesterday. Use the message timeline/date, not just the word in the message. Some chats also don't show a checkbox. Make this accurate.
+
+> Show a short story. Make the result trustworthy. Implement this.
 
 ## Optional prompts for future work
 

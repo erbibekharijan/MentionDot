@@ -4,6 +4,7 @@ import type {
   PriorityLevel,
 } from '../types';
 import { ItemCard } from './ItemCard';
+import { CatchUpStory } from './CatchUpStory';
 import { SourceViewer } from './SourceViewer';
 import { formatAsMarkdown, formatAsPlainText, downloadFile } from '../utils/exporter';
 import { SentinelBot } from './SentinelBot';
@@ -145,7 +146,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   );
   const updateItems = result.items.filter((i) => i.category === 'update');
 
-  const botBriefingMessage = `Decompiled ${result.stats.totalMessages} raw chat lines. I've highlighted ${result.stats.urgentCount} urgent items, ${result.stats.deadlineCount} deadlines, and ${result.stats.decisionCount} finalized team decisions. Every card links to verified raw evidence.`;
+  const botBriefingMessage = `Read ${result.stats.totalMessages} messages locally. I found ${result.stats.urgentCount} urgent signals, ${result.stats.deadlineCount} deadline mentions, and ${result.stats.decisionCount} messages matching decision language. Check each linked message before acting.`;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-300">
@@ -160,7 +161,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Here's what you missed.
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-sans">
-            Synthesized from {result.stats.totalMessages} messages across {result.stats.participants.length} participants with 100% source traceability.
+            Synthesized from {result.stats.totalMessages} messages across {result.stats.participants.length} participants. Findings link back to their source messages.
           </p>
         </div>
 
@@ -243,6 +244,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="bg-[#131418] border border-[#24262d] rounded-2xl p-4 shadow-sm">
         <SentinelBot state="ready" message={botBriefingMessage} />
       </div>
+
+      <CatchUpStory result={result} onViewSource={handleViewSource} />
 
       {/* Stats Ribbon with Warm Badges */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -511,13 +514,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-300" />
                 <h3 className="text-base font-bold text-[#f4f3ee] tracking-tight">
-                  Section D: Decisions Made
+                  Section D: Decision Signals
                 </h3>
                 <span className="text-xs px-2.5 py-0.5 rounded-md bg-[#1d1f27] text-zinc-300 border border-[#2d2f3a] font-semibold font-mono">
-                  {decisionItems.length} CONFIRMED
+                  {decisionItems.length} SIGNALS
                 </span>
               </div>
-              <span className="text-xs text-zinc-400">Agreements, approved tech & finalized plans</span>
+              <span className="text-xs text-zinc-400">Phrases that may indicate an agreement or choice</span>
             </div>
 
             {decisionItems.length === 0 ? (

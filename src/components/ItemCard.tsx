@@ -95,14 +95,20 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               )}
             </span>
             {item.isExplicit ? (
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#1b1c22] text-zinc-300 border border-[#2b2d37]">
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#1b1c22] text-zinc-300 border border-[#2b2d37]" title="The source message states this directly.">
                 EXPLICIT
               </span>
             ) : (
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20" title="This label is a rule-based interpretation of the source message.">
                 INFERRED
               </span>
             )}
+            <span
+              className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#fbfaf7] text-[#536170] border border-[#e3ddd2]"
+              title="Rule-match strength from local heuristics; this is not a probability that the finding is correct."
+            >
+              {item.confidence.toUpperCase()} RULE MATCH
+            </span>
           </div>
 
           <h4
@@ -117,6 +123,11 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           <div className="mt-2.5 text-xs bg-[#0c0d10] border border-[#22242a] rounded-lg p-2.5 text-zinc-300">
             <span className="text-amber-400 font-semibold mr-1.5 font-mono text-[11px]">WHY THIS MATTERS:</span>
             <span className="font-sans leading-relaxed text-zinc-300">{item.explanation}</span>
+            {item.deadline?.isAmbiguous && (
+              <span className="block mt-1 text-amber-700">
+                Date is ambiguous; verify it against the original conversation.
+              </span>
+            )}
           </div>
 
           {/* Deadline pill if present */}

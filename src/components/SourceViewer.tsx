@@ -58,7 +58,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
             </h3>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5 font-sans">
-            {messages.length} raw verified messages residing in volatile memory
+            {messages.length} original messages from this upload; timestamps are shown as provided
           </p>
         </div>
         <button
@@ -170,10 +170,10 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
       {/* Footer */}
       <div className="p-3.5 border-t border-[#23242a] bg-[#121317] text-[11px] text-zinc-500 flex items-center justify-between font-mono">
-        <span>Grounded in unmodified source text</span>
+        <span>Original source text · not independently verified</span>
         <span className="text-emerald-400 flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          VERIFIED
+          SOURCE
         </span>
       </div>
     </div>
