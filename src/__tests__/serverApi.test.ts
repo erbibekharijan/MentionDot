@@ -55,10 +55,12 @@ describe('AnalysisService Backend API', () => {
   });
 
   it('rejects missing or invalid text with HttpError 400', async () => {
-    // @ts-expect-error Testing runtime bad input
-    await expect(analysisService.analyze({})).rejects.toThrow(HttpError);
-    // @ts-expect-error Testing null input
-    await expect(analysisService.analyze({ text: null })).rejects.toThrow(HttpError);
+    await expect(
+      analysisService.analyze({} as unknown as Parameters<typeof analysisService.analyze>[0])
+    ).rejects.toThrow(HttpError);
+    await expect(
+      analysisService.analyze({ text: null } as unknown as Parameters<typeof analysisService.analyze>[0])
+    ).rejects.toThrow(HttpError);
   });
 
   it('rejects input that cannot be parsed into messages with 422', async () => {
@@ -109,8 +111,7 @@ describe('AnalysisService Backend API', () => {
   it('rejects unsupported export format with 400', async () => {
     const { result } = await analysisService.analyze({ text: SAMPLE_CHAT });
     expect(() =>
-      // @ts-expect-error Testing unsupported format
-      analysisService.export({ result, format: 'pdf' })
+      analysisService.export({ result, format: 'pdf' } as unknown as Parameters<typeof analysisService.export>[0])
     ).toThrow(HttpError);
   });
 
