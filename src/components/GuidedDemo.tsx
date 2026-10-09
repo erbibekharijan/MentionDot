@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowRight, BookOpenCheck, Check, ChevronRight, X } from 'lucide-react';
 import type { GuidedDemoStep } from '../types/guidedDemo';
+import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
 
 interface GuidedDemoProps {
   step: GuidedDemoStep | null;
@@ -82,6 +83,9 @@ export const GuidedDemo: React.FC<GuidedDemoProps> = ({
   onLoadDemo,
   onAdvance,
 }) => {
+  const welcomeDialogRef = useRef<HTMLElement>(null);
+  useDialogAccessibility(welcomeDialogRef, step === 'welcome', onSkip);
+
   useEffect(() => {
     if (!step || step === 'welcome') return;
 
@@ -90,10 +94,25 @@ export const GuidedDemo: React.FC<GuidedDemoProps> = ({
     const target = document.querySelector<HTMLElement>(`[data-tour="${targetName}"]`);
     if (!target) return;
 
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'center',
+    });
     target.classList.add('guided-tour-target');
     return () => target.classList.remove('guided-tour-target');
   }, [step]);
+
+  useEffect(() => {
+    if (!step || step === 'welcome') return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onSkip();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [step, onSkip]);
 
   if (!step) return null;
 
@@ -101,9 +120,11 @@ export const GuidedDemo: React.FC<GuidedDemoProps> = ({
     return (
       <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#202a35]/45 p-4 backdrop-blur-sm">
         <section
+          ref={welcomeDialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="guided-demo-welcome-title"
+          tabIndex={-1}
           className="w-full max-w-lg rounded-3xl border border-[#e3ddd2] bg-[#fffefa] p-6 shadow-2xl sm:p-8"
         >
           <div className="mb-5 inline-flex rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-800">
@@ -183,7 +204,15 @@ export const GuidedDemo: React.FC<GuidedDemoProps> = ({
             </p>
           )}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex gap-1.5" aria-label={`Step ${content.progress} of 8`}>
+            <div
+              className="flex gap-1.5"
+              role="progressbar"
+              aria-label="Guided demo progress"
+              aria-valuemin={1}
+              aria-valuemax={8}
+              aria-valuenow={content.progress}
+              aria-valuetext={`Step ${content.progress} of 8`}
+            >
               {Array.from({ length: 8 }, (_, index) => (
                 <span
                   key={index}

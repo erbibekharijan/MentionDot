@@ -182,8 +182,14 @@
 }
 
 .app-shell :is(button, input, textarea, select):focus-visible {
-  outline: 3px solid rgba(200, 121, 22, 0.38);
+  outline: 3px solid #80500e;
   outline-offset: 2px;
+}
+
+.app-shell a:focus-visible {
+  outline: 3px solid #80500e;
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 .app-shell [class*="rounded-2xl"][class*="border"],
@@ -395,7 +401,7 @@
 
 /* Focus ring */
 .focus-ring:focus-visible {
-  outline: 2px solid rgba(245, 166, 35, 0.6);
+  outline: 3px solid #80500e;
   outline-offset: 2px;
 }
 

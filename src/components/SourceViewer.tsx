@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Message } from '../types';
 import { X, Search, Clock, User, ArrowDownCircle, Check, Copy } from 'lucide-react';
+import { useDialogAccessibility } from '../hooks/useDialogAccessibility';
 
 interface SourceViewerProps {
   messages: Message[];
@@ -18,11 +19,16 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogAccessibility(dialogRef, isOpen, onClose);
 
   useEffect(() => {
     if (highlightedId && isOpen && itemRefs.current[highlightedId]) {
+      const prefersReducedMotion =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       itemRefs.current[highlightedId]?.scrollIntoView({
-        behavior: 'smooth',
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
         block: 'center',
       });
     }
@@ -47,13 +53,21 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
   };
 
   return (
-    <div data-tour="source-evidence" className="fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] md:w-[560px] bg-[#0c0d10] border-l border-[#24262d] shadow-2xl flex flex-col transition-transform duration-300 animate-in slide-in-from-right duration-200">
+    <div
+      ref={dialogRef}
+      data-tour="source-evidence"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="source-viewer-title"
+      tabIndex={-1}
+      className="fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] md:w-[560px] bg-[#0c0d10] border-l border-[#24262d] shadow-2xl flex flex-col transition-transform duration-300 animate-in slide-in-from-right duration-200"
+    >
       {/* Header */}
       <div className="p-4.5 border-b border-[#23242a] flex items-center justify-between bg-[#121317]">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-400" />
-            <h3 className="font-bold text-[#f4f3ee] text-sm font-mono tracking-tight">
+            <h3 id="source-viewer-title" className="font-bold text-[#f4f3ee] text-sm font-mono tracking-tight">
               SOURCE_EVIDENCE_DRAWER
             </h3>
           </div>
@@ -77,6 +91,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
           <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
+            aria-label="Search source messages"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search raw chat messages or sender..."
@@ -88,7 +103,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
       {/* Messages list */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 font-sans">
         {filteredMessages.length === 0 ? (
-          <div className="text-center py-16 text-zinc-500 text-xs">
+          <div role="status" className="text-center py-16 text-zinc-500 text-xs">
             No messages matching "{searchQuery}"
           </div>
         ) : (
@@ -148,6 +163,8 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     type="button"
                     onClick={() => handleCopyText(msg.id, msg.content)}
                     className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+                    aria-label={`${copiedId === msg.id ? 'Copied' : 'Copy'} source message ${msg.id}`}
+                    aria-live="polite"
                   >
                     {copiedId === msg.id ? (
                       <>

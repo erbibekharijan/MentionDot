@@ -62,6 +62,12 @@ npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+### Keyboard and motion accessibility
+
+- Dialogs and the source inspector move keyboard focus into the open panel, keep Tab navigation within it, close with **Escape**, and return focus to the opening control.
+- The guided tour can be dismissed with **Escape** and announces its progress to assistive technology.
+- Tour and evidence navigation use non-animated scrolling when reduced motion is enabled in the operating system.
+
 ### 3. Run Automated Unit Tests
 ```bash
 npm test

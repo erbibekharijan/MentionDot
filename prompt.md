@@ -73,6 +73,12 @@ This is not the complete historical prompt log for the original project. The pro
 
 > can u add a button if someone needs a tour anytime they need they get, and after the tour is finished, they should be redirected to home page again, because the catch me uses demo message for the tour, if anyone skip tour in middle or finish tour, they stay as it is, seeing demo chat data.
 
+### 13. Small changes without changing app logic
+
+> can u do some multiple minor changes, like change unchanage etc and keep pushing on github, so that I have multiple commit because no of comitd = extra points. just dont disturb the actual project logic ok
+
+The selected implementation was a real accessibility improvement rather than no-op or reverted commits: keyboard-operable dialogs and guided tour, clear focus indication, and reduced-motion-aware scrolling. No analysis or chat behavior was changed.
+
 ## Suggested prompts for possible future work — not prompts already used
 
 These are optional prompts drafted as ideas. They are not part of the historical user-prompt log.
@@ -88,3 +94,7 @@ These are optional prompts drafted as ideas. They are not part of the historical
 ### Improve the visual experience
 
 > Refine MISSED.'s visual design into a readable, warm editorial workspace. Improve text contrast, spacing, responsive behavior, keyboard focus, and reduced-motion support. Keep the existing Sentry bot character, use animation sparingly, and avoid adding visual effects that reduce clarity or accessibility.
+
+### Improve keyboard accessibility
+
+> Audit dialogs, drawers, and guided walkthroughs in MISSED. Ensure dialogs have accessible names, move focus into the dialog, keep keyboard focus inside while open, close with Escape, and restore focus to the control that opened them. Make guided-tour progress understandable to screen readers and respect reduced-motion preferences for programmatic scrolling.
