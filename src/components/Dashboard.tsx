@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import type {
   AnalysisResult,
   PriorityLevel,
@@ -54,11 +54,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [sourceViewerOpen, setSourceViewerOpen] = useState(false);
+  const [sourceViewerOpenedDuringTour, setSourceViewerOpenedDuringTour] = useState(false);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (tourStep !== 'evidence') setSourceViewerOpen(false);
-  }, [tourStep]);
 
   // Toggle item completion
   const handleToggleComplete = (itemId: string) => {
@@ -83,6 +80,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Open source viewer with focused message
   const handleViewSource = (messageId: string) => {
     setHighlightedMessageId(messageId);
+    setSourceViewerOpenedDuringTour(tourStep === 'source' || tourStep === 'evidence');
     setSourceViewerOpen(true);
     if (tourStep === 'source') onTourSourceOpened();
   };
@@ -701,8 +699,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <SourceViewer
         messages={result.messages}
         highlightedId={highlightedMessageId}
-        onClose={() => setSourceViewerOpen(false)}
-        isOpen={sourceViewerOpen}
+        onClose={() => {
+          setSourceViewerOpenedDuringTour(false);
+          setSourceViewerOpen(false);
+        }}
+        isOpen={
+          sourceViewerOpen &&
+          (!sourceViewerOpenedDuringTour || tourStep === 'evidence')
+        }
       />
     </div>
   );

@@ -34,15 +34,15 @@ Privacy in MISSED. is an architectural property, not a marketing claim:
 
 ## 🧱 Architecture and security
 
-MISSED. is intentionally a static, client-only application; it does not need accounts, an API server, or a database to analyze a pasted export.
+MISSED. is intentionally a static, client-only application; it does not need accounts, an API server, or a database to analyze a pasted export. Full parsing and analysis run in a dedicated Web Worker so large imports do not block the interface; the live message-count preview remains a lightweight main-thread parse. A generated service worker precaches the production app shell and hashed assets for offline use after the first successful visit.
 
 ```text
-Chat export ──> in-memory parser ──> local heuristic analyzer ──> cited briefing
+Chat export ──> analysis Web Worker ──> local parser + heuristic analyzer ──> cited briefing
                     │                       │                        │
                     └──────── source message IDs ───────────────────┘
 ```
 
-The only persistent application preference is whether the optional tour was seen. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy. The policy permits the Google Fonts stylesheet and font files used by the UI; it does not permit chat-content requests to third-party origins.
+The worker has a typed request/response boundary, superseded work is terminated, and failures are surfaced in the interface. The only persistent application preference is whether the optional tour was seen; the service worker caches application code and assets only, never chat text or results. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy. The policy permits the Google Fonts stylesheet and font files used by the UI; it does not permit chat-content requests to third-party origins.
 
 ---
 
@@ -52,7 +52,7 @@ The only persistent application preference is whether the optional tour was seen
 - **Bundler & Build Tool**: Vite 8
 - **Styling**: Tailwind CSS v4
 - **Icons**: Lucide React
-- **Test Runner**: Vitest (24 passing unit tests)
+- **Test Runner**: Vitest (25 passing unit tests)
 - **Deployment**: Static Site Hosting (Vercel Ready)
 
 ---
@@ -84,7 +84,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ```bash
 npm test
 ```
-Runs 24 automated Vitest unit tests verifying:
+Runs 25 automated Vitest unit tests verifying:
 - Bracketed and unbracketed message parsing
 - Multiline continuation and malformed line preservation
 - Urgency and priority scoring

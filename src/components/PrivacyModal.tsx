@@ -64,7 +64,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
             <div>
               <div className="font-semibold text-[#f4f3ee]">Ephemeral In-Memory React State</div>
               <p className="text-zinc-400 mt-0.5">
-                Pasted text, uploaded files, analysis, and checklist changes stay in transient memory; chat content is never written to `localStorage` or `IndexedDB`. A single `localStorage` flag remembers that you started or skipped the optional guided demo. “Clear Data” and closing the tab erase the current chat and briefing, but keep that preference so the welcome does not return.
+                Pasted text, uploaded files, analysis, and checklist changes stay in transient memory; chat content is never written to `localStorage` or `IndexedDB`. The offline service worker caches only app files, not chats or results. A single `localStorage` flag remembers whether you started or skipped the optional tour. “Clear Data” and closing the tab erase the current chat and briefing, but keep that preference.
               </p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
             <div>
               <div className="font-semibold text-[#f4f3ee]">Local Heuristics vs. Remote AI</div>
               <p className="text-zinc-400 mt-0.5">
-                We clearly label our engine as deterministic heuristic analysis. We do not claim local LLM inference when running browser rules.
+                MISSED. currently uses deterministic local rules, not an LLM; no remote provider or analysis endpoint is configured.
               </p>
             </div>
           </div>

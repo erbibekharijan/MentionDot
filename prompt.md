@@ -97,6 +97,8 @@ The selected implementation was a real accessibility improvement rather than no-
 >
 > this is the website where i publish my code and calculate points
 
+The user reported category scores of Innovation & Novelty 90, Code Standards & Quality 80, UI / UX & Impact 88, Backend & Architecture 70, and Security & Optimization 85. To retain the product's local-only privacy promise, they chose to strengthen its architecture with a Web Worker, offline support, and focused tests rather than add a server that would receive chat text.
+
 ## Suggested prompts for possible future work — not prompts already used
 
 These are optional prompts drafted as ideas. They are not part of the historical user-prompt log.

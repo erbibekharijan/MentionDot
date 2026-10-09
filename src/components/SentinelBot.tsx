@@ -1,5 +1,31 @@
 import React, { useState, useEffect } from 'react';
 
+function TypewriterText({ text }: { text: string }) {
+  const [displayText, setDisplayText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    let index = 0;
+    const characters = Array.from(text);
+    const interval = setInterval(() => {
+      index += 1;
+      setDisplayText(characters.slice(0, index).join(''));
+      if (index >= characters.length) {
+        setIsTyping(false);
+        clearInterval(interval);
+      }
+    }, 12);
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <>
+      {displayText}
+      {isTyping && <span className="text-[#f5a623] animate-tick">▋</span>}
+    </>
+  );
+}
+
 interface SentinelBotProps {
   state?: 'idle' | 'scanning' | 'ready';
   message?: string;
@@ -22,9 +48,7 @@ export const SentinelBot: React.FC<SentinelBotProps> = ({
   className = '',
 }) => {
   const [tipIndex, setTipIndex] = useState(0);
-  const [eyeState, setEyeState] = useState<'open' | 'blink' | 'scan'>('open');
-  const [displayText, setDisplayText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [eyeState, setEyeState] = useState<'open' | 'blink'>('open');
 
   const targetMessage = message || (
     state === 'scanning'
@@ -34,35 +58,18 @@ export const SentinelBot: React.FC<SentinelBotProps> = ({
       : TIPS[tipIndex]
   );
 
-  // Typewriter effect
-  useEffect(() => {
-    setIsTyping(true);
-    setDisplayText('');
-    let i = 0;
-    const chars = targetMessage.split('');
-    const interval = setInterval(() => {
-      if (i < chars.length) {
-        setDisplayText(chars.slice(0, i + 1).join(''));
-        i++;
-      } else {
-        setIsTyping(false);
-        clearInterval(interval);
-      }
-    }, 12);
-    return () => clearInterval(interval);
-  }, [targetMessage]);
-
   // Eye animation loop
   useEffect(() => {
-    if (state === 'scanning') {
-      setEyeState('scan');
-      return;
-    }
+    if (state === 'scanning') return;
+    let blinkTimeout: ReturnType<typeof setTimeout> | undefined;
     const loop = setInterval(() => {
       setEyeState('blink');
-      setTimeout(() => setEyeState('open'), 180);
+      blinkTimeout = setTimeout(() => setEyeState('open'), 180);
     }, 3800 + Math.random() * 2000);
-    return () => clearInterval(loop);
+    return () => {
+      clearInterval(loop);
+      if (blinkTimeout) clearTimeout(blinkTimeout);
+    };
   }, [state]);
 
   const dim = size === 'sm' ? 40 : size === 'lg' ? 64 : 52;
@@ -120,7 +127,7 @@ export const SentinelBot: React.FC<SentinelBotProps> = ({
           <span
             style={{
               width: isDim ? 3 : 4,
-              height: eyeState === 'blink' ? 1 : eyeState === 'scan' ? (isDim ? 8 : 12) : (isDim ? 8 : 12),
+              height: eyeState === 'blink' ? 1 : (isDim ? 8 : 12),
               borderRadius: 1,
               transition: 'height 0.08s ease',
               display: 'block',
@@ -138,7 +145,7 @@ export const SentinelBot: React.FC<SentinelBotProps> = ({
           <span
             style={{
               width: isDim ? 3 : 4,
-              height: eyeState === 'blink' ? 1 : eyeState === 'scan' ? (isDim ? 8 : 12) : (isDim ? 8 : 12),
+              height: eyeState === 'blink' ? 1 : (isDim ? 8 : 12),
               borderRadius: 1,
               transition: 'height 0.08s ease',
               display: 'block',
@@ -185,8 +192,7 @@ export const SentinelBot: React.FC<SentinelBotProps> = ({
             maxWidth: 480,
           }}
         >
-          {displayText}
-          {isTyping && <span className="text-[#f5a623] animate-tick">▋</span>}
+          <TypewriterText key={targetMessage} text={targetMessage} />
         </div>
       </div>
     </div>

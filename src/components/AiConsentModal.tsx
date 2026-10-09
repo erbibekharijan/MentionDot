@@ -32,10 +32,10 @@ export const AiConsentModal: React.FC<AiConsentModalProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-[#f4f3ee] tracking-tight">
-              Analysis Engine Providers
+              Analysis Engine
             </h3>
             <p className="text-xs text-zinc-400">
-              Modular architecture supporting local and remote analysis
+              Current processing and data-flow details
             </p>
           </div>
         </div>
@@ -60,21 +60,21 @@ export const AiConsentModal: React.FC<AiConsentModalProps> = ({
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-semibold text-zinc-300 flex items-center gap-1.5 font-mono">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                Remote AI Provider (e.g. Gemini / Claude)
+                Remote analysis
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] bg-[#1d1f26] text-zinc-400 border border-[#2a2c35] font-semibold font-mono">
-                OPTIONAL
+                NOT CONFIGURED
               </span>
             </div>
             <p className="text-zinc-400 leading-relaxed font-sans">
-              Implements the standard <code className="text-amber-300 font-mono">AnalysisProvider</code> interface for semantic reasoning via a secure server endpoint.
+              MISSED. does not currently connect to an AI provider or server endpoint. There is no remote-analysis switch, and chat data is never transmitted for analysis.
             </p>
             
             <div className="mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300 flex items-start gap-2">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <div className="font-sans">
-                <span className="font-semibold block">Informed Consent Notice:</span>
-                Switching to remote AI requires transmitting conversation text to an external inference endpoint. MISSED. will always ask for explicit confirmation before sending any chat data off-device.
+                <span className="font-semibold block">No remote transmission:</span>
+                This is an informational architecture note, not a provider toggle. Remote analysis would require a separate implementation and explicit consent.
               </div>
             </div>
           </div>

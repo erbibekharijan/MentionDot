@@ -8,15 +8,15 @@ import { AiConsentModal } from './components/AiConsentModal';
 import { GuidedDemo } from './components/GuidedDemo';
 import { SAMPLE_CONVERSATION_RAW } from './data/sampleConversation';
 import { parseConversation } from './utils/parser';
-import { LocalHeuristicProvider } from './utils/analyzer';
 import type { AnalysisResult, UserConfig } from './types';
 import { GUIDED_DEMO_SEEN_KEY } from './types/guidedDemo';
 import type { GuidedDemoStep } from './types/guidedDemo';
 import { ShieldCheck } from 'lucide-react';
-
-const localAnalyzer = new LocalHeuristicProvider();
+import { useLocalAnalysisWorker } from './hooks/useLocalAnalysisWorker';
 
 export function App() {
+  const { analyze: analyzeInWorker, cancel: cancelWorkerAnalysis } =
+    useLocalAnalysisWorker();
   const [rawText, setRawText] = useState<string>('');
   const [userConfig, setUserConfig] = useState<UserConfig>({
     userName: 'Bibek',
@@ -24,6 +24,7 @@ export function App() {
   });
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [privacyModalOpen, setPrivacyModalOpen] = useState<boolean>(false);
   const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
   const [tourStep, setTourStep] = useState<GuidedDemoStep | null>(() => {
@@ -40,6 +41,7 @@ export function App() {
   const tourSampleLoaded = useRef(false);
   const preTourState = useRef<{ rawText: string; result: AnalysisResult | null } | null>(null);
   const tourGeneration = useRef(0);
+  const analysisGeneration = useRef(0);
 
   // Live parsed message count
   const messageCount = useMemo(() => {
@@ -54,26 +56,33 @@ export function App() {
     config: UserConfig,
     isCurrent: () => boolean = () => true
   ): Promise<boolean> => {
+    const generation = ++analysisGeneration.current;
+    const isAnalysisCurrent = () =>
+      analysisGeneration.current === generation && isCurrent();
+    setAnalysisError(null);
     setIsAnalyzing(true);
     try {
-      const messages = parseConversation(textToAnalyze);
-      const analysis = await localAnalyzer.analyze(messages, config);
-      if (!isCurrent()) return false;
+      const analysis = await analyzeInWorker(textToAnalyze, config);
+      if (!isAnalysisCurrent()) return false;
       setResult(analysis);
 
       // Scroll to dashboard
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return true;
     } catch (err) {
-      console.error('Analysis failed:', err);
+      if (isAnalysisCurrent() && !(err instanceof DOMException && err.name === 'AbortError')) {
+        console.error('Analysis failed:', err);
+        setAnalysisError(
+          err instanceof Error
+            ? `Analysis failed: ${err.message}`
+            : 'Analysis failed unexpectedly. Please try again.'
+        );
+      }
       return false;
     } finally {
-      setIsAnalyzing(false);
+      if (isAnalysisCurrent()) setIsAnalyzing(false);
     }
   };
-
-
-
 
   const handleAnalyze = () => {
     if (!rawText.trim()) return;
@@ -106,6 +115,9 @@ export function App() {
 
   const handleCloseTour = () => {
     tourGeneration.current += 1;
+    analysisGeneration.current += 1;
+    cancelWorkerAnalysis();
+    setIsAnalyzing(false);
     rememberTourChoice();
     setTourStep(null);
     if (tourSampleLoaded.current) {
@@ -119,6 +131,9 @@ export function App() {
 
   const handleReplayTour = () => {
     tourGeneration.current += 1;
+    analysisGeneration.current += 1;
+    cancelWorkerAnalysis();
+    setIsAnalyzing(false);
     setTourNotice(null);
     preTourState.current = { rawText, result };
     tourSampleLoaded.current = false;
@@ -164,6 +179,9 @@ export function App() {
   // Reset all state to pure in-memory zero
   const handleReset = () => {
     if (window.confirm('Clear the current conversation and briefing? Your tutorial preference will be kept.')) {
+      analysisGeneration.current += 1;
+      cancelWorkerAnalysis();
+      setIsAnalyzing(false);
       setRawText('');
       setResult(null);
       setTourStep(null);
@@ -194,6 +212,14 @@ export function App() {
 
       {/* Main Content */}
       <main className="flex-1">
+        {analysisError && (
+          <div
+            role="alert"
+            className="mx-auto mt-5 max-w-3xl rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+          >
+            {analysisError}
+          </div>
+        )}
         {result ? (
           /* Analysis Dashboard */
           <Dashboard
@@ -260,7 +286,7 @@ export function App() {
       <AiConsentModal
         isOpen={aiModalOpen}
         onClose={() => setAiModalOpen(false)}
-        activeProvider={localAnalyzer.name}
+        activeProvider="Local Heuristic Engine"
       />
 
       <GuidedDemo

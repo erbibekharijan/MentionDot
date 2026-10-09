@@ -73,10 +73,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'distilled' | 'raw'>('distilled');
   const [metricIndex, setMetricIndex] = useState(0);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const interval = setInterval(() => {
       setMetricIndex(i => (i + 1) % METRICS.length);
     }, 2800);
@@ -103,7 +101,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
         {/* Privacy pill */}
         <div
-          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-10 transition-all ${mounted ? 'animate-fade-up' : 'opacity-0'}`}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-10 transition-all animate-fade-up"
           style={{
             background: '#111114',
             border: '1px solid #1e1e24',
@@ -129,7 +127,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
         {/* SentinelBot greeting */}
         <div
-          className={`max-w-lg mx-auto mb-12 text-left p-4 rounded-2xl transition-all ${mounted ? 'animate-fade-up' : 'opacity-0'}`}
+          className="max-w-lg mx-auto mb-12 text-left p-4 rounded-2xl transition-all animate-fade-up"
           style={{
             background: '#111114',
             border: '1px solid #1e1e24',
@@ -144,7 +142,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
         {/* Headline */}
         <h1
-          className={`font-black leading-[1.08] tracking-tight mb-6 ${mounted ? 'animate-fade-up' : 'opacity-0'}`}
+          className="font-black leading-[1.08] tracking-tight mb-6 animate-fade-up"
           style={{
             fontSize: 'clamp(36px, 6vw, 68px)',
             fontFamily: 'var(--font-sans)',
@@ -162,7 +160,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
         </h1>
 
         <p
-          className={`max-w-xl mx-auto mb-10 ${mounted ? 'animate-fade-up' : 'opacity-0'}`}
+          className="max-w-xl mx-auto mb-10 animate-fade-up"
           style={{
             fontSize: 16,
             lineHeight: 1.7,
@@ -176,7 +174,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
         {/* CTAs */}
         <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 ${mounted ? 'animate-fade-up' : 'opacity-0'}`}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 animate-fade-up"
           style={{ animationDelay: '0.22s' }}
         >
           <button
@@ -212,7 +210,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
         {/* Scenario shortcuts */}
         <div
-          className={`flex flex-wrap items-center justify-center gap-2 ${mounted ? 'animate-fade-up' : 'opacity-0'}`}
+          className="flex flex-wrap items-center justify-center gap-2 animate-fade-up"
           style={{ animationDelay: '0.28s' }}
         >
           <span
