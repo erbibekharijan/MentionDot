@@ -186,4 +186,4 @@ ProtocolX/
 - **No fake integrations**: Raw chat text and exported files are explicitly supported; no phantom third-party APIs are claimed.
 - **No black-box hallucinated deadlines**: Ambiguous dates without specified month or year are clearly flagged with documented ambiguity reasons.
 - **Privacy transparency**: Conversation processing stays client-side; the only persisted app preference is the guided-tour flag, which contains no chat data.
-- **Guided demo**: First-visit walkthrough of importing, reading the story, checking source evidence, and using the briefing. Dismissal is remembered locally without saving conversation content.
+- **Guided demo**: Optional first-visit walkthrough of importing, reading the story, checking source evidence, and using the briefing. The header **Take a tour** button replays it on demand. Finishing or skipping clears the temporary sample and restores any chat/briefing that was open before the tour.

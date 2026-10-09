@@ -110,10 +110,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               color: '#a8a49c',
               fontFamily: 'var(--font-mono)',
             }}
-            title="Replay the guided product tour"
+            title="Take or replay the guided product tour"
           >
             <BookOpenCheck className="w-3.5 h-3.5" style={{ color: '#f5a623' }} />
-            <span>TOUR</span>
+            <span className="hidden sm:inline">TAKE A TOUR</span>
+            <span className="sm:hidden">TOUR</span>
           </button>
 
           {/* Privacy badge */}

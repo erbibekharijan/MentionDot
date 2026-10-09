@@ -69,6 +69,10 @@ This is not the complete historical prompt log for the original project. The pro
 
 > did u update prompt.md, it shoud have everything
 
+### 12. Replay tour and return after completion
+
+> can u add a button if someone needs a tour anytime they need they get, and after the tour is finished, they should be redirected to home page again, because the catch me uses demo message for the tour, if anyone skip tour in middle or finish tour, they stay as it is, seeing demo chat data.
+
 ## Suggested prompts for possible future work — not prompts already used
 
 These are optional prompts drafted as ideas. They are not part of the historical user-prompt log.

@@ -68,7 +68,7 @@ const TOUR_CONTENT: Partial<
   },
   finish: {
     title: 'You are ready to catch up',
-    body: 'Use MISSED. with your own export whenever you like. The guided demo will not pop up again after refresh or reset. Choose Guided tour in the header to replay it.',
+    body: 'Use MISSED. with your own export whenever you like. The temporary demo chat is cleared when you finish or skip, and any chat you had open before the tour is restored. The welcome will not pop up again after refresh or reset; choose Take a tour in the header whenever you want to replay it.',
     action: 'Done',
     progress: 8,
   },
@@ -117,7 +117,7 @@ export const GuidedDemo: React.FC<GuidedDemoProps> = ({
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-[#536170]">
             Follow a fictional team chat from import to story, source evidence, and action list.
-            You can skip now, or replay the tour later from the header.
+            You can skip now, or take the tour any time from the header.
           </p>
           {notice && (
             <p role="status" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">

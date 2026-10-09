@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { LandingHero } from './components/LandingHero';
 import { InputSection } from './components/InputSection';
@@ -7,7 +7,6 @@ import { PrivacyModal } from './components/PrivacyModal';
 import { AiConsentModal } from './components/AiConsentModal';
 import { GuidedDemo } from './components/GuidedDemo';
 import { SAMPLE_CONVERSATION_RAW } from './data/sampleConversation';
-import { buildCatchUpStory } from './utils/catchUpStory';
 import { parseConversation } from './utils/parser';
 import { LocalHeuristicProvider } from './utils/analyzer';
 import type { AnalysisResult, UserConfig } from './types';
@@ -38,6 +37,9 @@ export function App() {
     }
   });
   const [tourNotice, setTourNotice] = useState<string | null>(null);
+  const tourSampleLoaded = useRef(false);
+  const preTourState = useRef<{ rawText: string; result: AnalysisResult | null } | null>(null);
+  const tourGeneration = useRef(0);
 
   // Live parsed message count
   const messageCount = useMemo(() => {
@@ -47,11 +49,16 @@ export function App() {
   }, [rawText]);
 
   // Run analysis
-  const executeAnalysis = async (textToAnalyze: string, config: UserConfig): Promise<boolean> => {
+  const executeAnalysis = async (
+    textToAnalyze: string,
+    config: UserConfig,
+    isCurrent: () => boolean = () => true
+  ): Promise<boolean> => {
     setIsAnalyzing(true);
     try {
       const messages = parseConversation(textToAnalyze);
       const analysis = await localAnalyzer.analyze(messages, config);
+      if (!isCurrent()) return false;
       setResult(analysis);
 
       // Scroll to dashboard
@@ -92,24 +99,43 @@ export function App() {
   };
 
   const handleStartTour = () => {
+    preTourState.current = { rawText, result };
     rememberTourChoice();
     setTourStep('input');
   };
 
   const handleCloseTour = () => {
+    tourGeneration.current += 1;
     rememberTourChoice();
     setTourStep(null);
+    if (tourSampleLoaded.current) {
+      setRawText(preTourState.current?.rawText ?? '');
+      setResult(preTourState.current?.result ?? null);
+      tourSampleLoaded.current = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    preTourState.current = null;
   };
 
   const handleReplayTour = () => {
+    tourGeneration.current += 1;
     setTourNotice(null);
-    setTourStep(result && buildCatchUpStory(result).length > 0 ? 'story' : 'input');
+    preTourState.current = { rawText, result };
+    tourSampleLoaded.current = false;
+    setTourStep('input');
   };
 
   const handleTourLoadDemo = async () => {
+    const generation = ++tourGeneration.current;
     setTourNotice(null);
+    tourSampleLoaded.current = true;
     setRawText(SAMPLE_CONVERSATION_RAW);
-    const loaded = await executeAnalysis(SAMPLE_CONVERSATION_RAW, userConfig);
+    const loaded = await executeAnalysis(
+      SAMPLE_CONVERSATION_RAW,
+      userConfig,
+      () => tourGeneration.current === generation && tourSampleLoaded.current
+    );
+    if (tourGeneration.current !== generation) return;
     if (loaded) {
       setTourStep('story');
     } else {
@@ -141,6 +167,9 @@ export function App() {
       setRawText('');
       setResult(null);
       setTourStep(null);
+      tourGeneration.current += 1;
+      tourSampleLoaded.current = false;
+      preTourState.current = null;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
