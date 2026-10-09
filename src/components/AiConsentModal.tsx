@@ -52,7 +52,7 @@ export const AiConsentModal: React.FC<AiConsentModalProps> = ({
               </span>
             </div>
             <p className="text-zinc-400 leading-relaxed font-sans">
-              Deterministic, explainable rule engine running completely inside your browser. No data ever leaves your machine. Fast, reliable, and 100% private.
+              Deterministic, explainable rules run in your browser. Chat text is not sent to a server; the page loads fonts from Google Fonts, which receives normal connection metadata but not your conversation content.
             </p>
           </div>
 

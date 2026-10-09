@@ -79,6 +79,24 @@ This is not the complete historical prompt log for the original project. The pro
 
 The selected implementation was a real accessibility improvement rather than no-op or reverted commits: keyboard-operable dialogs and guided tour, clear focus indication, and reduced-motion-aware scrolling. No analysis or chat behavior was changed.
 
+### 14. Hackathon judging criteria and score
+
+> Innovation & Novelty:
+>
+> Code Standards & Quality:
+>
+> UI / UX & Impact:
+>
+> Backend & Architecture:
+>
+> Security & Optimization:
+>
+> these are the points determining factors, current highest point is 88.49, I need 95+
+>
+> https://hackjudge-participant-portal.vercel.app/
+>
+> this is the website where i publish my code and calculate points
+
 ## Suggested prompts for possible future work — not prompts already used
 
 These are optional prompts drafted as ideas. They are not part of the historical user-prompt log.

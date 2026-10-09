@@ -1,7 +1,7 @@
 # MISSED.
 
 > **“Catch up on what matters. Keep your chats yours.”**  
-> *The AI-powered, privacy-first conversation intelligence inbox for Protocol X Hackathon.*
+> *A privacy-first conversation briefing, powered by explainable rules that run in your browser.*
 
 ---
 
@@ -17,7 +17,7 @@ People return to hundreds of unread messages across group chats, team channels, 
 - **You Were Mentioned**: Targeted mentions matching your identity and aliases.
 - **Waiting On**: Potential unanswered questions and blockers needing response.
 - **Conversation Timeline**: Interactive chronological milestones with source links.
-- **100% Traceability**: Every single item links directly to its source message in the conversation inspector.
+- **Source-linked findings**: Findings include the originating message when the local rules can identify one; inspect the quote before acting.
 
 ---
 
@@ -25,12 +25,24 @@ People return to hundreds of unread messages across group chats, team channels, 
 
 Privacy in MISSED. is an architectural property, not a marketing claim:
 
-1. **100% In-Browser Execution**: All message parsing, date extraction, priority scoring, and classification run entirely inside your browser's JavaScript runtime.
+1. **In-browser analysis**: Message parsing, date extraction, priority scoring, and classification run in your browser. Chat text is not sent to a server. The page loads fonts from Google Fonts, which receives normal connection metadata but not your conversation content.
 2. **Zero Cloud Database Storage**: No Supabase, Firebase, or external database is required or connected.
 3. **Transient In-Memory Chat State**: Messages, briefings, and checklist changes exist only in React memory. Chat content is never written to `localStorage` or `IndexedDB`.
 4. **One Non-Content Preference**: `localStorage` stores a single boolean indicating whether the optional first-visit guided demo was started or skipped. It contains no messages or analysis and survives “Clear Data” so the welcome does not reappear. Clearing browser site data resets it.
 5. **Clear Current Session**: Clicking **"Clear Data"** immediately purges the current conversation and briefing from React memory. The guided-demo preference is intentionally retained.
-6. **Deterministic Heuristics over Black-Box Hallucinations**: We explicitly distinguish deterministic local heuristics from remote generative AI. If an optional remote model is ever connected, explicit informed consent is required before transmitting data.
+6. **Deterministic heuristics, not generative AI**: Findings are produced by local rules, not an AI model. They can be wrong or miss context; source links help you verify the evidence, but do not independently verify an interpretation.
+
+## 🧱 Architecture and security
+
+MISSED. is intentionally a static, client-only application; it does not need accounts, an API server, or a database to analyze a pasted export.
+
+```text
+Chat export ──> in-memory parser ──> local heuristic analyzer ──> cited briefing
+                    │                       │                        │
+                    └──────── source message IDs ───────────────────┘
+```
+
+The only persistent application preference is whether the optional tour was seen. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy. The policy permits the Google Fonts stylesheet and font files used by the UI; it does not permit chat-content requests to third-party origins.
 
 ---
 
