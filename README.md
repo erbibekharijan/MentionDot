@@ -42,7 +42,7 @@ Chat export ──> analysis Web Worker ──> local parser + heuristic analyze
                     └──────── source message IDs ───────────────────┘
 ```
 
-The worker has a typed request/response boundary, superseded work is terminated, and failures are surfaced in the interface. The only persistent application preference is whether the optional tour was seen; the service worker caches application code and assets only, never chat text or results. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy. The policy permits the Google Fonts stylesheet and font files used by the UI; it does not permit chat-content requests to third-party origins.
+The worker validates request/response shapes at runtime, superseded work is terminated, stale messages are ignored, and failures are surfaced in the interface. The only persistent application preference is whether the optional tour was seen; the service worker precaches generated app assets and does not dynamically cache arbitrary requests. Vercel responses also set a Content Security Policy, disable framing and MIME sniffing, restrict browser permissions, and apply a conservative referrer policy. The policy permits the Google Fonts stylesheet and font files used by the UI; it does not permit chat-content requests to third-party origins.
 
 ---
 
@@ -52,7 +52,7 @@ The worker has a typed request/response boundary, superseded work is terminated,
 - **Bundler & Build Tool**: Vite 8
 - **Styling**: Tailwind CSS v4
 - **Icons**: Lucide React
-- **Test Runner**: Vitest (25 passing unit tests)
+- **Test Runner**: Vitest (30 passing unit tests)
 - **Deployment**: Static Site Hosting (Vercel Ready)
 
 ---
@@ -84,7 +84,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ```bash
 npm test
 ```
-Runs 25 automated Vitest unit tests verifying:
+Runs 30 automated Vitest unit tests verifying:
 - Bracketed and unbracketed message parsing
 - Multiline continuation and malformed line preservation
 - Urgency and priority scoring
@@ -93,6 +93,7 @@ Runs 25 automated Vitest unit tests verifying:
 - Ground-truth message ID traceability
 - Chronological story selection and source-message integrity
 - Markdown and Plain Text export formatting
+- Worker request/response validation, lifecycle, failures, cancellation, and stale-message handling
 
 ### 4. Build for Production
 ```bash

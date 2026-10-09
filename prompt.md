@@ -44,8 +44,8 @@ Paste / text upload
 ```
 
 - **Client:** React 19, TypeScript, Vite, and Tailwind CSS. It is a static application; analysis does not require accounts, an API server, or a database.
-- **Analysis boundary:** a module Web Worker receives a typed request and returns a typed success or error response. Superseded work is terminated so an old analysis cannot overwrite a newer result. Analysis failures are surfaced to the user.
-- **Offline behavior:** the production build generates a service worker that precaches the application shell, hashed JavaScript and CSS, and the analysis worker. It caches same-origin application GET responses for offline use. It does not persist conversations or analysis results.
+- **Analysis boundary:** a module Web Worker receives a runtime-validated request and returns a runtime-validated success or error response. A focused client owns worker lifecycle, terminates superseded work, ignores late messages, and rejects startup, transport, worker, and malformed-response failures. Analysis failures are surfaced to the user.
+- **Offline behavior:** the production build generates a service worker that precaches the application shell, hashed JavaScript and CSS, and the analysis worker. Runtime fetch handling only serves the precache or performs a network request; it does not dynamically cache arbitrary same-origin responses. It does not persist conversations or analysis results.
 - **Persistence:** the guided-tour preference is the only application preference stored in `localStorage`. Conversation text, parsed messages, results, and checklist changes live in application memory.
 - **Deployment protections:** Vercel response headers include a restrictive Content Security Policy, `worker-src 'self'`, framing and MIME-sniffing protections, a referrer policy, and a restrictive Permissions Policy. Google Fonts is used for presentation; the stylesheet provider can receive normal connection metadata, but the app does not send it chat text.
 
@@ -56,20 +56,20 @@ This is an evidence map, not a claim about what an automated evaluator will awar
 | Criterion | Verifiable evidence in MISSED. | Honest scope |
 |---|---|---|
 | **Innovation & Novelty** | An evidence-linked, chronological catch-up story; priority queues, date-aware deadlines, source inspection, a fictional guided walkthrough, and a local checklist combine into a focused chat-triage workflow. | This is a practical workflow built from explainable heuristics, not a novel language model or a claim of perfect understanding. |
-| **Code Standards & Quality** | Typed TypeScript contracts; parsing, analysis, UI, worker protocol, and export utilities are separated; parser, analyzer, story, export, and worker-boundary tests exercise key behavior. | The codebase is compact and client-side; tests cover important behavior, not every browser, export format, or possible chat syntax. |
+| **Code Standards & Quality** | Typed TypeScript contracts; parsing, analysis, UI, worker client/protocol, and export utilities are separated; runtime guards protect the worker message boundary; tests exercise parsing, analyzer, story, export, worker lifecycle, malformed messages, failures, cancellation, and source integrity. | The codebase is compact and client-side; tests cover important behavior, not every browser, export format, or possible chat syntax. |
 | **UI / UX & Impact** | Responsive briefing and source inspector, actionable filters, exports, fictional sample, replayable/skippable tour, keyboard-operable dialogs, visible focus, and reduced-motion-aware navigation. | The product helps users review candidate findings; it does not read private chat accounts or take actions on their behalf. |
-| **Backend & Architecture** | A typed Web Worker keeps full parsing and analysis off the main UI thread; a generated service worker enables app-shell caching; static deployment keeps operating requirements small. | There is deliberately no cloud backend or database. Do not describe the worker or service worker as a server-side backend. Local-only privacy is a product tradeoff, not a missing feature presented as implemented. |
-| **Security & Optimization** | Chat analysis is local; analysis requests are cancellable; the app shell cache excludes user conversation state; security response headers constrain browser capabilities and resource origins; only same-origin GETs are handled by the service worker. | The app does not promise zero network activity: the UI loads Google Fonts. Browser extensions, compromised devices, and errors in the local heuristics are outside the app's guarantees. |
+| **Backend & Architecture** | A runtime-validated Web Worker keeps full parsing and analysis off the main UI thread; a generated service worker precaches app assets for offline use; worker lifecycle is isolated behind a testable client; static deployment keeps operating requirements small. | There is deliberately no cloud backend or database. Do not describe the worker or service worker as a server-side backend. Local-only privacy is a product tradeoff, not a missing feature presented as implemented. |
+| **Security & Optimization** | Chat analysis is local; worker requests are cancellable and runtime-validated; the app shell cache contains generated assets only and does not dynamically cache arbitrary requests; security response headers constrain browser capabilities and resource origins. | The app does not promise zero network activity: the UI loads Google Fonts. Browser extensions, compromised devices, and errors in the local heuristics are outside the app's guarantees. |
 
 ## Current verification record
 
 Validated for the changes documented here:
 
 - `npm run build` — production build succeeds and emits the analysis worker and `sw.js`.
-- `npm test` — **25 tests pass across 5 test files**, including a worker-boundary test that checks source-message integrity.
+- `npm test` — **30 tests pass across 5 test files**, including worker request/response validation, source-linked results, startup/transport/runtime failures, cancellation, and stale responses.
 - `npm run lint` — completes without warnings.
-- Production preview — the fictional sample produced a briefing without an analysis error; browser inspection confirmed the active service worker cached the app shell and analysis-worker bundle.
-- `git push` — the implementation was pushed to the configured `master` branch. The latest commit recorded when this document was updated is `65c3d45` (`feat: move analysis off the UI thread`). A successful push does not by itself prove that a hosting provider has deployed that commit; verify the live deployment before submitting it.
+- Production preview — HTTP returned `200`; generated `sw.js` includes the hashed analysis-worker bundle and offline navigation fallback, and does not dynamically cache arbitrary requests.
+- `git push` — the implementation was pushed to the configured `master` branch. A successful push does not by itself prove that a hosting provider has deployed the latest commit; verify the live deployment before submitting it.
 
 ## Prompt strategy — concise master brief
 

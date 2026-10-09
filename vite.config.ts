@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -14,12 +15,10 @@ function offlineShellPlugin(): Plugin {
         )
         .map((file) => `/${file.fileName}`);
       const precacheUrls = JSON.stringify([...new Set(['/', '/index.html', ...appFiles])]);
-      const version = appFiles
-        .filter((file) => /\.(js|css)$/.test(file))
-        .join('|')
-        .split('')
-        .reduce((hash, character) => (Math.imul(hash, 31) + character.charCodeAt(0)) | 0, 0)
-        .toString(36);
+      const version = createHash('sha256')
+        .update(appFiles.filter((file) => /\.(js|css)$/.test(file)).join('|'))
+        .digest('hex')
+        .slice(0, 12);
 
       this.emitFile({
         type: 'asset',
@@ -44,20 +43,11 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
-        .then((response) => {
-          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', response.clone()));
-          return response;
-        })
         .catch(() => caches.match('/index.html'))
     );
     return;
   }
-  event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
-      return response;
-    }))
-  );
+  event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
 });
 `,
       });

@@ -1,10 +1,28 @@
 import { LocalHeuristicProvider } from '../utils/analyzer';
 import { parseConversation } from '../utils/parser';
-import type { AnalysisRequest, AnalysisResponse } from './analysisProtocol';
+import {
+  isAnalysisRequest,
+  type AnalysisRequest,
+  type AnalysisResponse,
+} from './analysisProtocol';
 
 export async function runAnalysisRequest(
-  request: AnalysisRequest
+  input: unknown
 ): Promise<AnalysisResponse> {
+  if (!isAnalysisRequest(input)) {
+    const inputId =
+      input !== null && typeof input === 'object' && 'id' in input
+        ? input.id
+        : undefined;
+    const id =
+      typeof inputId === 'number' &&
+      Number.isSafeInteger(inputId) &&
+      inputId > 0
+        ? inputId
+        : 1;
+    return { id, ok: false, error: 'The analysis request was invalid.' };
+  }
+  const request: AnalysisRequest = input;
   try {
     const messages = parseConversation(request.rawText);
     const result = await new LocalHeuristicProvider().analyze(
@@ -19,7 +37,7 @@ export async function runAnalysisRequest(
 }
 
 if (typeof self !== 'undefined') {
-  self.addEventListener('message', (event: MessageEvent<AnalysisRequest>) => {
+  self.addEventListener('message', (event: MessageEvent<unknown>) => {
     void runAnalysisRequest(event.data).then((response) => self.postMessage(response));
   });
 }
