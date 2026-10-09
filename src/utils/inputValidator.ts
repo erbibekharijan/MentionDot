@@ -18,7 +18,7 @@ import type { UserConfig } from '../types';
 // ---------------------------------------------------------------------------
 
 export type ValidationResult =
-  | { ok: true }
+  | { ok: true; reason?: undefined }
   | { ok: false; reason: string };
 
 // ---------------------------------------------------------------------------
